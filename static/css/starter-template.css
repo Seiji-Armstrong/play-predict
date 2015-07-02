@@ -1,0 +1,29 @@
+body {
+	background: url('/static/images/mike6.jpg') no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    background-size: cover;
+    -o-background-size: cover;
+  padding-top: 30px;
+}
+h2,p,label,th,td{
+	color: white;
+}
+
+a{
+	color: white;
+	font-size: 20px;
+}
+
+
+
+table {
+ background-color: black;
+ opacity: 0.85;
+
+}
+
+
+.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+  background-color: purple;
+}
