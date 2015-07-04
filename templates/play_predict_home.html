@@ -60,56 +60,18 @@
   <div class="container">
     <div class="starter-template">
         <h2>NBA Player Performance Predictor</h2>
-        <p>Please pick a Date from the Calendar, then choose a Game from the dropdown menu.
+        <p>Please pick a game date from the calendar (between October 20 and April 15).
         </p>
     </div>
     <div class = "container">
-        <form  action="/dashboard" method="GET">
+        <form  action="/play_predict_game_select" method="GET">
       <div class="hero-unit">
         <label for="example1">Game Date:</label>
         <input  type="text" placeholder="Pick a game date"  id="example1" name='date'>
        
       </div>
-        <!-- <form  action="/dashboard" method="GET"> -->
-        <div class="form-group">
-          <label for="ID">Game:</label>    
-          <select name="game_select">
-            <option value="game_id_1">Select a game</option>
-            <option value="game_id_1">Chicago versus Boston</option>
-             <!-- Text could be result string. -->
-            <option value="20090119.MILPOR">Milwaukee v Portland</option>
-            <option value="20090119.MILPOR">Utah Jazz v Toronto Raptors</option>
-            <option value="20090119.MILPOR">New Jersey v New York</option>
-            <option value="20090119.MILPOR">New Orleans Hornets v Cleveland Cavaliers</option>
-          </select>
-        </div>
 
-        <div class="form-group">
-
-          <p>Please enter a game time (48 minutes):</p>
-          <label for="ID">Game time:</label>
-          <!-- <input type="text" id="game_row" name='game_row' placeholder="e.g. 250 or 450"> -->
-
-          <select name="game_row">
-            <option value=20>02:00</option>
-            <option value=40>04:00</option>
-            <option value=80>08:00</option>
-            <option value=120>12:00</option>
-            <option value=160>16:00</option>
-            <option value=200>20:00</option>
-            <option value=240>24:00</option>
-            <option value=280>28:00</option>
-            <option value=320>32:00</option>
-            <option value=360>36:00</option>
-            <option value=400>40:00</option>
-            <option value=440>44:00</option>
-            <option value=460>46:00</option>
-          </select>
-
-
-
-
-        </div>        
+ -->
         <div>
           <button type="submit" class="btn btn-default btn-lg">Go!</button>
         </div>

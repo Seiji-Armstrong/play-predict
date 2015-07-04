@@ -60,27 +60,28 @@
   <div class="container">
     <div class="starter-template">
         <h2>NBA Player Performance Predictor</h2>
-        <p>Please pick a Date from the Calendar, then choose a Game from the dropdown menu.
+        <p>Please pick a game from the dropdown menu.
         </p>
     </div>
     <div class = "container">
         <form  action="/dashboard" method="GET">
-      <div class="hero-unit">
+<!--       <div class="hero-unit">
         <label for="example1">Game Date:</label>
         <input  type="text" placeholder="Pick a game date"  id="example1" name='date'>
        
-      </div>
+      </div> -->
         <!-- <form  action="/dashboard" method="GET"> -->
         <div class="form-group">
           <label for="ID">Game:</label>    
           <select name="game_select">
-            <option value="game_id_1">Select a game</option>
-            <option value="game_id_1">Chicago versus Boston</option>
-             <!-- Text could be result string. -->
-            <option value="20090119.MILPOR">Milwaukee v Portland</option>
-            <option value="20090119.MILPOR">Utah Jazz v Toronto Raptors</option>
-            <option value="20090119.MILPOR">New Jersey v New York</option>
-            <option value="20090119.MILPOR">New Orleans Hornets v Cleveland Cavaliers</option>
+
+            {% for teams in team_list %}
+
+            <option value="{{teams.keys()[0]}}">{{ teams.values()[0] }}</option>
+
+            {% endfor %}
+
+
           </select>
         </div>
 
@@ -128,8 +129,8 @@
     <script src="static/js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
-     <script src="static/js/bootstrap-datepicker.js"></script>
-        <script type="text/javascript">
+    <!-- // <script src="static/js/bootstrap-datepicker.js"></script> -->
+/*<!--         <script type="text/javascript">
             // When the document is ready
             $(document).ready(function () {
                 
@@ -142,7 +143,7 @@
         });
             
             });
-        </script>
+        </script> -->*/
 
 
   </body>

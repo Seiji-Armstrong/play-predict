@@ -69,6 +69,11 @@ def game_date_input_tidy(date_input):
     game_date = '2009' + date_input[3:5] + date_input[:2]
     return game_date
 
+def game_date_tidy(date_input):
+    year = int(date_input[-4:])
+    game_date = str(year-6) + date_input[3:5] + date_input[:2]
+    return game_date
+
 def gameIDs_sql(database,table):
     conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database, host="0.0.0.0",
         cursorclass=MySQLdb.cursors.DictCursor)
@@ -143,28 +148,7 @@ def current_period_time(this_game,row):
     return [this_game.iloc[row].period, this_game.iloc[row].time]
 
 
-def good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos):
-    if current_streak_pos >= 0:
-        count_current_streak = pos_streak_counts[current_streak_pos]
-        count_remaining = sum(pos_streak_counts[current_streak_pos:])
-        prob_next = count_remaining/(count_current_streak+count_remaining)
-    else: # if current_streak_pos is negative
-        count_current_streak = neg_streak_counts[abs(current_streak_pos)]
-        count_remaining = sum(pos_streak_counts[abs(current_streak_pos):])
-        prob_next = count_current_streak/(count_current_streak+count_remaining)
-    return prob_next
 
-def good_play_2_next(pos_streak_counts,neg_streak_counts,current_streak_pos):
-    if current_streak_pos >= 0:
-        prob_pos = good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos)
-        pos = prob_pos*good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos+1)
-        neg = (1-prob_pos)*good_play_next(pos_streak_counts,neg_streak_counts,-1)
-    else: # if negative
-        prob_neg = good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos)
-        pos = (1-prob_neg)*good_play_next(pos_streak_counts,neg_streak_counts,1)
-        neg = prob_neg*good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos-1)
-    prob_2_next = pos + neg
-    return prob_2_next
 
 
 def teams_in_game(game_id):
@@ -248,6 +232,8 @@ def last_5_next_performance(database,table,starting_five,this_game,row):
         performance_list.append(player_dict)
     return performance_list
 
+
+
 def frame_from_player(player_name,this_game):
     activityFrame = this_game[this_game["player"] == player_name]
     stealFrame = this_game[this_game["steal"]== player_name]
@@ -290,3 +276,114 @@ def add_2_dict_values(dict1,dict2):
 def stats_performance(stats_dict,stats_weights):
     performance = sum([stats_dict[key]*stats_weights[key] for key in stats_dict])    
     return performance
+
+def teams_from_date(date_input):
+    game_date = game_date_tidy(date_input)
+    database = 'next_play'
+    table = 'season_2008'
+    game_id_df = gameIDs_sql(database,table)
+    games_by_date_df = game_id_df[game_id_df['gameID'].str.contains(game_date)]
+    if games_by_date_df['gameID'].values.any():
+        team_list = []
+        for game in games_by_date_df['gameID']:
+            team_1 = game[-6:-3].lower()
+            team_2 = game[-3:].lower()
+            dict_1 = {game:teams_dict[team_1]+ ' v ' + teams_dict[team_2]}
+            team_list.append(dict_1)
+    else:
+        team_list = [{'20090121.CLEPOR': 'Cleveland Cavaliers v Portland Trail Blazers'}]    
+    return team_list
+
+def player_pos_count(player_name):
+    database = 'next_play'
+    table = 'pos_count_players'
+    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database,
+                           cursorclass=MySQLdb.cursors.DictCursor)
+    cmd_target = 'SELECT * FROM '+ table + ';'
+    this_frame = pd.read_sql(cmd_target, con=conn)
+    pos_streak_counts = pd.Series(this_frame[player_name])
+    return pos_streak_counts
+
+def player_neg_count(player_name):
+    database = 'next_play'
+    table = 'neg_count_players'
+    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database,
+                           cursorclass=MySQLdb.cursors.DictCursor)
+    cmd_target = 'SELECT * FROM '+ table + ';'
+    this_frame = pd.read_sql(cmd_target, con=conn)
+    neg_streak_counts = pd.Series(this_frame[player_name])
+    return neg_streak_counts
+
+
+def good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos):
+    if current_streak_pos >= 0:
+        count_current_streak = pos_streak_counts[current_streak_pos]
+        count_remaining = sum(pos_streak_counts[current_streak_pos:])
+        prob_next = count_remaining/(count_current_streak+count_remaining)
+    else: # if current_streak_pos is negative
+        count_current_streak = neg_streak_counts[abs(current_streak_pos)]
+        count_remaining = sum(pos_streak_counts[abs(current_streak_pos):])
+        prob_next = count_current_streak/(count_current_streak+count_remaining)
+    return prob_next
+
+def good_play_2_next(pos_streak_counts,neg_streak_counts,current_streak_pos):
+    if current_streak_pos >= 0:
+        prob_pos = good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos)
+        pos = prob_pos*good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos+1)
+        neg = (1-prob_pos)*good_play_next(pos_streak_counts,neg_streak_counts,-1)
+    else: # if negative
+        prob_neg = good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos)
+        pos = (1-prob_neg)*good_play_next(pos_streak_counts,neg_streak_counts,1)
+        neg = prob_neg*good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos-1)
+    prob_2_next = pos + neg
+    return prob_2_next
+
+
+
+
+def good_play_next_cond(pos_streak_counts,neg_streak_counts,current_streak_pos):
+    current_streak_pos = int(current_streak_pos)
+    if current_streak_pos >= 0:
+        current_pos = current_streak_pos - 1
+        count_current_streak = pos_streak_counts[current_pos]
+        count_remaining = sum(pos_streak_counts[current_pos+1:])
+        prob_next = count_remaining/(count_current_streak+count_remaining)
+    else: # if current_streak_pos is negative
+        current_pos = abs(current_streak_pos) - 1
+        count_current_streak = neg_streak_counts[current_pos]
+        count_remaining = sum(neg_streak_counts[current_pos+1:])
+        prob_next = count_current_streak/(count_current_streak+count_remaining)    
+    return prob_next
+
+def good_play_2_next_cond(pos_streak_counts,neg_streak_counts,current_streak_pos):
+    if current_streak_pos >= 0:
+        prob_pos = good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos)
+        pos = prob_pos*good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos+1)
+        neg = (1-prob_pos)*good_play_next(pos_streak_counts,neg_streak_counts,-1)
+    else: # if negative
+        prob_neg = good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos)
+        pos = (1-prob_neg)*good_play_next(pos_streak_counts,neg_streak_counts,1)
+        neg = prob_neg*good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos-1)
+    prob_2_next = pos + neg
+    return prob_2_next
+
+
+def last_5_next(database,table,starting_five,this_game,row):
+    performance_list = []
+    for player_name in starting_five:
+        last_5_perf = []
+        player_dict = {}
+
+        pos_streak_counts = player_pos_count(player_name)
+        neg_streak_counts = player_neg_count(player_name)
+
+        current_streak_pos = current_streak_pos_player(player_name,this_game,row)
+        Next_1_play = good_play_next_cond(pos_streak_counts,neg_streak_counts,current_streak_pos)
+        Next_2_play = good_play_2_next_cond(pos_streak_counts,neg_streak_counts,current_streak_pos)
+        N = 5
+        player_frame_game = frame_from_player(player_name,this_game)
+        player_last5 = recent_perf(player_name,player_frame_game,N,row,stats_weights)
+        player_dict = {'player': player_name, 'current_pos': current_streak_pos, 'player_last5': player_last5[1], 'Next_1_play': str(round(100*Next_1_play,2))+' %', 'Next_2_play': str(round(100*Next_2_play,2))+' %'}
+        performance_list.append(player_dict)
+    return performance_list
+
