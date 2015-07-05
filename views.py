@@ -40,10 +40,12 @@ def play_predict_output(): # above decorator modifies the function (so function 
     table = 'streak_frame_with_perf'   
     
     starting_five_1 = starting_five[:5]
-    performance_list_table_1 = nba.last_5_next_performance(database,table,starting_five_1,this_game,row)
+    # performance_list_table_1 = nba.last_5_next_performance(database,table,starting_five_1,this_game,row)
+    performance_list_table_1 = nba.last_5_next(database,table,starting_five_1,this_game,row)
 
     starting_five_2 = starting_five[5:]
-    performance_list_table_2 = nba.last_5_next_performance(database,table,starting_five_2,this_game,row)
+    # performance_list_table_2 = nba.last_5_next_performance(database,table,starting_five_2,this_game,row)
+    performance_list_table_2 = nba.last_5_next(database,table,starting_five_2,this_game,row)
 
     play_now = nba.current_play_description(this_game,row)
     period_time = nba.current_period_time(this_game,row)

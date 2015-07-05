@@ -210,30 +210,6 @@ def last_3_next_performance_(database,table,starting_five,this_game,row):
         performance_list.append(player_dict)
     return performance_list
 
-def last_5_next_performance(database,table,starting_five,this_game,row):
-    performance_list = []
-    # current_streak_pos for each player in starting_five.
-    # look at last 3 plays for each player.
-    for player_name in starting_five:
-        last_5_perf = []
-        player_dict = {}
-        player_frame = player_frame_from_sql(database,table,player_name)
-        pos_or_neg = 'pos_streak_list'
-        pos_streak_counts = streak_counts_pos_neg(player_frame,pos_or_neg)
-        pos_or_neg = 'neg_streak_list' 
-        neg_streak_counts = streak_counts_pos_neg(player_frame,pos_or_neg)
-        current_streak_pos = current_streak_pos_player(player_name,this_game,row)
-        Next_1_play = good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos)
-        Next_2_play = good_play_2_next(pos_streak_counts,neg_streak_counts,current_streak_pos)
-        N = 5
-        player_frame_game = frame_from_player(player_name,this_game)
-        player_last5 = recent_perf(player_name,player_frame_game,N,row,stats_weights)
-        player_dict = {'player': player_name, 'current_pos': current_streak_pos, 'player_last5': player_last5[1], 'Next_1_play': str(round(100*Next_1_play,2))+' %', 'Next_2_play': str(round(100*Next_2_play,2))+' %'}
-        performance_list.append(player_dict)
-    return performance_list
-
-
-
 def frame_from_player(player_name,this_game):
     activityFrame = this_game[this_game["player"] == player_name]
     stealFrame = this_game[this_game["steal"]== player_name]
@@ -301,7 +277,7 @@ def player_pos_count(player_name):
                            cursorclass=MySQLdb.cursors.DictCursor)
     cmd_target = 'SELECT * FROM '+ table + ';'
     this_frame = pd.read_sql(cmd_target, con=conn)
-    pos_streak_counts = pd.Series(this_frame[player_name])
+    pos_streak_counts = pd.Series(this_frame[player_name]).fillna(0)
     return pos_streak_counts
 
 def player_neg_count(player_name):
@@ -311,7 +287,7 @@ def player_neg_count(player_name):
                            cursorclass=MySQLdb.cursors.DictCursor)
     cmd_target = 'SELECT * FROM '+ table + ';'
     this_frame = pd.read_sql(cmd_target, con=conn)
-    neg_streak_counts = pd.Series(this_frame[player_name])
+    neg_streak_counts = pd.Series(this_frame[player_name]).fillna(0)
     return neg_streak_counts
 
 
@@ -344,11 +320,16 @@ def good_play_2_next(pos_streak_counts,neg_streak_counts,current_streak_pos):
 def good_play_next_cond(pos_streak_counts,neg_streak_counts,current_streak_pos):
     current_streak_pos = int(current_streak_pos)
     if current_streak_pos >= 0:
+        if sum(pos_streak_counts) < 50:
+            return 0.5195 # Measured relevant mean for lower rank players
         current_pos = current_streak_pos - 1
         count_current_streak = pos_streak_counts[current_pos]
         count_remaining = sum(pos_streak_counts[current_pos+1:])
         prob_next = count_remaining/(count_current_streak+count_remaining)
-    else: # if current_streak_pos is negative
+    else:
+        if sum(neg_streak_counts) < 50:
+            return 0.4895 # Measured relevant mean for lower rank players
+        # if current_streak_pos is negative
         current_pos = abs(current_streak_pos) - 1
         count_current_streak = neg_streak_counts[current_pos]
         count_remaining = sum(neg_streak_counts[current_pos+1:])
@@ -357,16 +338,42 @@ def good_play_next_cond(pos_streak_counts,neg_streak_counts,current_streak_pos):
 
 def good_play_2_next_cond(pos_streak_counts,neg_streak_counts,current_streak_pos):
     if current_streak_pos >= 0:
+        if sum(pos_streak_counts) < 50:
+            return 0.4765 # Measured relevant mean for lower rank players        
         prob_pos = good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos)
         pos = prob_pos*good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos+1)
         neg = (1-prob_pos)*good_play_next(pos_streak_counts,neg_streak_counts,-1)
     else: # if negative
+        if sum(neg_streak_counts) < 50:
+            return 0.4590 # Measured relevant mean for lower rank players      
         prob_neg = good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos)
         pos = (1-prob_neg)*good_play_next(pos_streak_counts,neg_streak_counts,1)
         neg = prob_neg*good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos-1)
     prob_2_next = pos + neg
     return prob_2_next
 
+def last_5_next_performance(database,table,starting_five,this_game,row):
+    performance_list = []
+    # current_streak_pos for each player in starting_five.
+    # look at last 3 plays for each player.
+    for player_name in starting_five:
+        last_5_perf = []
+        player_dict = {}
+        player_frame = player_frame_from_sql(database,table,player_name)
+        pos_or_neg = 'pos_streak_list'
+        pos_streak_counts = streak_counts_pos_neg(player_frame,pos_or_neg)
+        pos_or_neg = 'neg_streak_list' 
+        neg_streak_counts = streak_counts_pos_neg(player_frame,pos_or_neg)
+
+        current_streak_pos = current_streak_pos_player(player_name,this_game,row)
+        Next_1_play = good_play_next(pos_streak_counts,neg_streak_counts,current_streak_pos)
+        Next_2_play = good_play_2_next(pos_streak_counts,neg_streak_counts,current_streak_pos)
+        N = 5
+        player_frame_game = frame_from_player(player_name,this_game)
+        player_last5 = recent_perf(player_name,player_frame_game,N,row,stats_weights)
+        player_dict = {'player': player_name, 'current_pos': current_streak_pos, 'player_last5': player_last5[1], 'Next_1_play': str(round(100*Next_1_play,2))+' %', 'Next_2_play': str(round(100*Next_2_play,2))+' %'}
+        performance_list.append(player_dict)
+    return performance_list
 
 def last_5_next(database,table,starting_five,this_game,row):
     performance_list = []
