@@ -62,6 +62,12 @@ teams_dict = {'bos':'Boston Celtics',
 stats_weights = {'point': 1, 'rebound': 1.2, 'assist': 1.5, 
                 'steal': 2, 'block': 2, 'turnover': -1, 'foul': -0.5,
                 'missed_fg': -0.5, 'missed_ft': -0.5, 'three_pt': 1.5}
+stats_weights_rand_forest = {'point': 1.1, 'rebound': 1.2, 'assist': 1.5, 
+                'steal': 2.3, 'block': 2.1, 'turnover': -1, 'foul': -0.7,
+                'missed_fg': -0.5, 'missed_ft': -0.3, 'three_pt': 1.3}
+adj_dict = {'point': 0.62782609, 'rebound': 0.58347826, 'assist': 0.59891304, 
+                'steal': 0.64141304, 'block': 0.61315217, 'three_pt': 0.59684783}
+adj_list = ['point', 'rebound', 'assist','steal', 'block', 'three_pt']
 
 #########################
 
@@ -273,8 +279,8 @@ def teams_from_date(date_input):
 def player_pos_count(player_name):
     database = 'next_play'
     table = 'pos_count_players'
-    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database,
-                           cursorclass=MySQLdb.cursors.DictCursor)
+    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database, host="0.0.0.0",
+        cursorclass=MySQLdb.cursors.DictCursor)
     cmd_target = 'SELECT * FROM '+ table + ';'
     this_frame = pd.read_sql(cmd_target, con=conn)
     pos_streak_counts = pd.Series(this_frame[player_name]).fillna(0)
@@ -283,8 +289,8 @@ def player_pos_count(player_name):
 def player_neg_count(player_name):
     database = 'next_play'
     table = 'neg_count_players'
-    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database,
-                           cursorclass=MySQLdb.cursors.DictCursor)
+    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database,host="0.0.0.0",
+    cursorclass=MySQLdb.cursors.DictCursor)
     cmd_target = 'SELECT * FROM '+ table + ';'
     this_frame = pd.read_sql(cmd_target, con=conn)
     neg_streak_counts = pd.Series(this_frame[player_name]).fillna(0)
@@ -375,6 +381,7 @@ def last_5_next_performance(database,table,starting_five,this_game,row):
         performance_list.append(player_dict)
     return performance_list
 
+
 def last_5_next(database,table,starting_five,this_game,row):
     performance_list = []
     for player_name in starting_five:
@@ -390,6 +397,13 @@ def last_5_next(database,table,starting_five,this_game,row):
         N = 5
         player_frame_game = frame_from_player(player_name,this_game)
         player_last5 = recent_perf(player_name,player_frame_game,N,row,stats_weights)
+
+        N=1
+        last_play = recent_perf(player_name,player_frame_game,N,row,stats_weights)
+        if len(last_play[0].keys()) > 0:
+            if last_play[0].keys()[0] in adj_dict.keys():
+                adj_key = last_play[0].keys()[0]
+                Next_1_play = 0.9*Next_1_play+0.1*adj_dict[adj_key]
         player_dict = {'player': player_name, 'current_pos': current_streak_pos, 'player_last5': player_last5[1], 'Next_1_play': str(round(100*Next_1_play,2))+' %', 'Next_2_play': str(round(100*Next_2_play,2))+' %'}
         performance_list.append(player_dict)
     return performance_list

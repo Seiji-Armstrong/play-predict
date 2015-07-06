@@ -17,8 +17,11 @@ def play_predict_input(): # above decorator modifies the function (so function n
 
 def play_predict_game_select(): # above decorator modifies the function (so function name useless)
     date_input = request.args.get('date')
-    team_list = nba.teams_from_date(date_input)
-
+    if len(date_input) == 10 and date_input[2] == "/" and date_input[5]  == "/":
+        team_list = nba.teams_from_date(date_input)        
+    else:
+        err_message = 'Please pick from the calendar and do not enter text.'
+        return render_template("play_predict_home.html")
     return render_template("play_predict_game_select.html", team_list = team_list)
 
 
@@ -30,7 +33,6 @@ def play_predict_output(): # above decorator modifies the function (so function 
 
     rowIndex = int(request.args.get('game_row'))
     game_id = request.args.get('game_select')
-    print game_id
     database = 'next_play'
     table = 'season_2008'
     teams_list = nba.teams_in_game(game_id) # redundant
