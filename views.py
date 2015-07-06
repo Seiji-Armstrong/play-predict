@@ -33,14 +33,23 @@ def play_predict_output(): # above decorator modifies the function (so function 
 
     rowIndex = int(request.args.get('game_row'))
     game_id = request.args.get('game_select')
+
     database = 'next_play'
     table = 'season_2008'
     teams_list = nba.teams_in_game(game_id) # redundant
     this_game = nba.create_game_frame_sql(database,table,game_id)
+    
+
+    times_list = nba.times_list_game(this_game)
+
+    
+
     row = min(rowIndex, len(this_game.index)-1)
     starting_five = nba.starting_five_from_game(this_game)
+    
     table = 'streak_frame_with_perf'   
     
+
     starting_five_1 = starting_five[:5]
     # performance_list_table_1 = nba.last_5_next_performance(database,table,starting_five_1,this_game,row)
     performance_list_table_1 = nba.last_5_next(database,table,starting_five_1,this_game,row)
@@ -52,7 +61,7 @@ def play_predict_output(): # above decorator modifies the function (so function 
     play_now = nba.current_play_description(this_game,row)
     period_time = nba.current_period_time(this_game,row)
 
-    return render_template("dashboard.html", period_time = period_time, play_now = play_now, 
+    return render_template("dashboard.html", period_time = period_time, play_now = play_now, game_id = game_id, times_list = times_list,
         teams_list = teams_list, table_from_list_1 = performance_list_table_1, table_from_list_2 = performance_list_table_2)
 
 

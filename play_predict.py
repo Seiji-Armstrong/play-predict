@@ -408,3 +408,12 @@ def last_5_next(database,table,starting_five,this_game,row):
         performance_list.append(player_dict)
     return performance_list
 
+
+def times_list_game(this_game):
+    times_list = []
+    for i in range(len(this_game)):
+        game_row = this_game.iloc[i]
+        dict_1 = {i:'Quarter '+str(game_row['period'])+', '+str(game_row['time'])}
+        times_list.append(dict_1)
+    return times_list
+

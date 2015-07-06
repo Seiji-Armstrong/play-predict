@@ -90,21 +90,40 @@
           {{period_time[1]}} left in quarter {{period_time[0]}}.
         </h2>
 
-
+<!-- 
         <a href="#" class="btn btn-info btn-lg">
           <span class="glyphicon glyphicon-step-forward"></span> Next play
-        </a>
+        </a> -->
         <br>
         
+    <div class = "container">
+        <form  action="/dashboard" method="GET">
+        <div class="form-group">
+          <label for="ID">Game time:</label>    
+          <select name="game_row">
+            {% for times in times_list %}
+            <option value="{{times.keys()[0]}}">{{ times.values()[0] }}</option>
+            {% endfor %}
+          </select>
 
-
-
+          <select name="game_select">
+            <option value="{{ game_id }}"></option>
+          </select>
+          
+        </div>
+       
+        <div>
+          <button type="submit" class="btn btn-default btn-lg">Change time</button>
+        </div>
+        </form>
+    </div>
 
 
         <h2>Real-time play: {{ play_now }}</h2>
         <p>
         </p>
     </div>
+
 
 
 
