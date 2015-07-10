@@ -99,7 +99,8 @@
     <div class = "container">
         <form  action="/dashboard" method="GET">
         <div class="form-group">
-          <label for="ID">Game time:</label>    
+<!--           <label for="ID">Game time:</label> --> 
+          <label for="ID"></label>   
           <select name="game_row">
             {% for times in times_list %}
             <option value="{{times.keys()[0]}}">{{ times.values()[0] }}</option>
@@ -113,7 +114,7 @@
         </div>
        
         <div>
-          <button type="submit" class="btn btn-default btn-lg">Change time</button>
+          <button type="submit" class="btn btn-info btn-lg">Change time</button>
         </div>
         </form>
     </div>

@@ -173,12 +173,7 @@ def pos_or_neg_play(this_play):
     else:
         return 1
 
-def find_previous_event_row(PlayerFrame,rowIndex):
-    # returns a pandas series of relevant play-by-play row.
-    relevant_index = rowIndex
-    if rowIndex not in PlayerFrame.index:
-        relevant_index = PlayerFrame.index[bisect.bisect_left(PlayerFrame.index,rowIndex) - 1]
-    return PlayerFrame.ix[relevant_index].fillna(0)
+
 
 def current_streak_pos_player(player_name,this_game,row):
     player_this_game = this_game[this_game["player"] == player_name]
@@ -224,17 +219,7 @@ def frame_from_player(player_name,this_game):
     player_frame_game = pd.concat([stealFrame,assistFrame,blockFrame,activityFrame])
     return player_frame_game.sort_index(axis=0) # might not need to sort_index.
 
-def recent_perf(player_name,player_frame_game,N,rowIndex,stats_weights):
-    stats_dict={}
-    # return performance rating (one number) and stats_dict given a player frame, rowIndex, and N plays
-    row = rowIndex
-    N = min(len(player_frame_game.index),N)
-    for past_play in range(N):
-        current_event_series = find_previous_event_row(player_frame_game,row)
-        stats_dict = one_event_stat(player_name,current_event_series,stats_dict)
-        row = current_event_series.name-1       
-    performance_rating = stats_performance(stats_dict,stats_weights)
-    return [stats_dict, performance_rating]
+
 
 def one_event_stat(player_name,current_series,stats_dict):
     # update dictionary of stats (stats_dict) with stat from current row.
@@ -380,6 +365,25 @@ def last_5_next_performance(database,table,starting_five,this_game,row):
         player_dict = {'player': player_name, 'current_pos': current_streak_pos, 'player_last5': player_last5[1], 'Next_1_play': str(round(100*Next_1_play,2))+' %', 'Next_2_play': str(round(100*Next_2_play,2))+' %'}
         performance_list.append(player_dict)
     return performance_list
+
+def find_previous_event_row(PlayerFrame,rowIndex):
+    # returns a pandas series of relevant play-by-play row.
+    relevant_index = rowIndex
+    if rowIndex not in PlayerFrame.index:
+        relevant_index = PlayerFrame.index[bisect.bisect_left(PlayerFrame.index,rowIndex) - 1]
+    return PlayerFrame.ix[relevant_index].fillna(0)
+
+def recent_perf(player_name,player_frame_game,N,rowIndex,stats_weights):
+    stats_dict={}
+    # return performance rating (one number) and stats_dict given a player frame, rowIndex, and N plays
+    row = rowIndex
+    N = min(len(player_frame_game.index),N)
+    for past_play in range(N):
+        current_event_series = find_previous_event_row(player_frame_game,row)
+        stats_dict = one_event_stat(player_name,current_event_series,stats_dict)
+        row = current_event_series.name-1       
+    performance_rating = stats_performance(stats_dict,stats_weights)
+    return [stats_dict, performance_rating]
 
 
 def last_5_next(database,table,starting_five,this_game,row):
