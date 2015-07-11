@@ -57,6 +57,54 @@ teams_dict = {'bos':'Boston Celtics',
                   'sea':'Seattle SuperSonics'
                   }
 
+teams_dict_list = [{'bos':'Boston Celtics'},
+                  {'njn':'New Jersey Nets'},
+                  {'nyk':'New York Knicks'},
+                  {'phi':'Philadelphia 76ers'},
+                  {'tor':'Toronto Raptors'},
+                  {'gsw':'Golden State Warriors'},
+                  {'lac':'Los Angeles Clippers'},
+                  {'lal':'Los Angeles Lakers'},
+                  {'phx':'Phoenix Suns'},
+                  {'sac':'Sacramento Kings'},
+                  {'chi':'Chicago Bulls'},
+                  {'cle':'Cleveland Cavaliers'},
+                  {'det':'Detroit Pistons'},
+                  {'ind':'Indiana Pacers'},
+                  {'mil':'Milwaukee Bucks'},
+                  {'dal':'Dallas Mavericks'},
+                  {'hou':'Houston Rockets'},
+                  {'mem':'Memphis Grizzlies'},
+                  {'noh':'New Orleans Hornets'},
+                  {'nok':'New Orleans/Oklahoma City Hornets'},
+                  {'sas':'San Antonio Spurs'},
+                  {'atl':'Atlanta Hawks'},
+                  {'cha':'Charlotte Bobcats'},
+                  {'mia':'Miami Heat'},
+                  {'orl':'Orlando Magic'},
+                  {'was':'Washington Wizards'},
+                  {'den':'Denver Nuggets'},
+                  {'min':'Minnesota Timberwolves'},
+                  {'okc':'Oklahoma City Thunder'},
+                  {'por':'Portland Trail Blazers'},
+                  {'uta':'Utah Jazz'},
+                  {'sea':'Seattle SuperSonics'}
+                  ]
+
+month_dict = {'01':'January',
+              '02':'Febuary',
+              '03':'March',
+              '04':'April',
+              '05':'May',
+              '06':'June',
+              '07':'July',
+              '08':'August',
+              '09':'September',
+              '10':'October',
+              '11':'November',
+              '12':'December'
+              }
+
 
 # sns.set_context("notebook", font_scale=1.6)
 stats_weights = {'point': 1, 'rebound': 1.2, 'assist': 1.5, 
@@ -420,4 +468,35 @@ def times_list_game(this_game):
         dict_1 = {i:'Quarter '+str(game_row['period'])+', '+str(game_row['time'])}
         times_list.append(dict_1)
     return times_list
+
+def teams_from_select(team_input_1,team_input_2):
+    database = 'next_play'
+    table = 'season_2008'
+    game_id_df = gameIDs_sql(database,table)
+    games_by_team1_df = game_id_df[(game_id_df['gameID'].str.contains(team_input_1.upper()+team_input_2.upper()))]
+    games_by_team2_df = game_id_df[(game_id_df['gameID'].str.contains(team_input_2.upper()+team_input_1.upper()))]
+    games_by_team1_all_df = game_id_df[(game_id_df['gameID'].str.contains(team_input_1.upper()))]
+    team_list = []
+    if games_by_team1_df['gameID'].values.any():
+        for game in games_by_team1_df['gameID']:
+            team_1 = game[-6:-3].lower()
+            team_2 = game[-3:].lower()
+            dict_1 = {game:month_dict[game[4:6]]+ ' ' + game[6:8] + ', ' + teams_dict[team_1]+ ' v ' + teams_dict[team_2]}
+            team_list.append(dict_1)
+    if games_by_team2_df['gameID'].values.any():
+        for game in games_by_team2_df['gameID']:
+            team_1 = game[-6:-3].lower()
+            team_2 = game[-3:].lower()
+            dict_1 = {game:month_dict[game[4:6]]+ ' ' + game[6:8] + ', ' + teams_dict[team_1]+ ' v ' + teams_dict[team_2]}
+            team_list.append(dict_1)
+    else:
+        if games_by_team1_all_df['gameID'].values.any():
+            for game in games_by_team1_all_df['gameID']:
+                team_1 = game[-6:-3].lower()
+                team_2 = game[-3:].lower()
+                dict_1 = {game:month_dict[game[4:6]]+ ' ' + game[6:8] + ', ' + teams_dict[team_1]+ ' v ' + teams_dict[team_2]}
+                team_list.append(dict_1)
+        else:
+            team_list = [{'20090121.CLEPOR': 'Cleveland Cavaliers v Portland Trail Blazers'}]
+    return team_list
 
