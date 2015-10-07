@@ -127,9 +127,9 @@ def game_date_tidy(date_input):
     year = int(date_input[-4:])
     game_date = str(year-6) + date_input[3:5] + date_input[:2]
     return game_date
-
+# MySQL
 def gameIDs_sql(database,table):
-    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database, host="0.0.0.0",
+    conn = MySQLdb.connect(user="root",passwd="xxxx",db=database, host="0.0.0.0",
         cursorclass=MySQLdb.cursors.DictCursor)
     cmd_target = 'SELECT DISTINCT gameID FROM season_2008;'
     df_gameIDs = pd.read_sql(cmd_target, con=conn)
@@ -137,7 +137,7 @@ def gameIDs_sql(database,table):
     return df_gameIDs
 
 def create_game_frame_sql(database,table,game_id):
-    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database, host="0.0.0.0",
+    conn = MySQLdb.connect(user="root",passwd="xxxx",db=database, host="0.0.0.0",
         cursorclass=MySQLdb.cursors.DictCursor)
     cmd_target = 'SELECT * FROM '+ table + ' WHERE gameID IN (\''+ game_id +'\');'
     this_game = pd.read_sql(cmd_target, con=conn)
@@ -168,7 +168,7 @@ def create_performance_table_test(database,table,starting_five):
     return performance_list
 
 def player_frame_from_sql(database,table,player_name):
-    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database, host="0.0.0.0",
+    conn = MySQLdb.connect(user="root",passwd="xxxx",db=database, host="0.0.0.0",
         cursorclass=MySQLdb.cursors.DictCursor)
     cmd_target = 'SELECT * FROM '+ table + ' WHERE player IN (\''+ player_name +'\');'
     player_frame = pd.read_sql(cmd_target, con=conn)
@@ -312,7 +312,7 @@ def teams_from_date(date_input):
 def player_pos_count(player_name):
     database = 'next_play'
     table = 'pos_count_players'
-    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database, host="0.0.0.0",
+    conn = MySQLdb.connect(user="root",passwd="xxxx",db=database, host="0.0.0.0",
         cursorclass=MySQLdb.cursors.DictCursor)
     cmd_target = 'SELECT * FROM '+ table + ';'
     this_frame = pd.read_sql(cmd_target, con=conn)
@@ -322,7 +322,7 @@ def player_pos_count(player_name):
 def player_neg_count(player_name):
     database = 'next_play'
     table = 'neg_count_players'
-    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database,host="0.0.0.0",
+    conn = MySQLdb.connect(user="root",passwd="xxxx",db=database,host="0.0.0.0",
     cursorclass=MySQLdb.cursors.DictCursor)
     cmd_target = 'SELECT * FROM '+ table + ';'
     this_frame = pd.read_sql(cmd_target, con=conn)
