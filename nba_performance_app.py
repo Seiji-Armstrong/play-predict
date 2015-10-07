@@ -140,7 +140,7 @@ def create_streak_frame(df):
     return game_streak_frame
 
 def gameIDs_sql(database,table):
-    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database,
+    conn = MySQLdb.connect(user="root",passwd="xxxx",db=database,
                            cursorclass=MySQLdb.cursors.DictCursor)
     cmd_target = 'SELECT DISTINCT gameID FROM season_2008;'
     df_gameIDs = pd.read_sql(cmd_target, con=conn)
@@ -149,7 +149,7 @@ def gameIDs_sql(database,table):
 
 def create_streak_frame_sql(database,table):
     df_gameIDs = gameIDs_sql(database,table)
-    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database,
+    conn = MySQLdb.connect(user="root",passwd="xxxx",db=database,
                            cursorclass=MySQLdb.cursors.DictCursor)
     games_streak_list = []
     for game_id in df_gameIDs.values[:-1]:
@@ -170,7 +170,7 @@ def starting_five_from_game(game_frame):
 
 
 def create_game_frame_sql(database,table,game_id):
-    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database,
+    conn = MySQLdb.connect(user="root",passwd="xxxx",db=database,
                            cursorclass=MySQLdb.cursors.DictCursor)
     cmd_target = 'SELECT * FROM '+ table + ' WHERE gameID IN (\''+ game_id +'\');'
     this_game = pd.read_sql(cmd_target, con=conn)
@@ -180,7 +180,7 @@ def create_game_frame_sql(database,table,game_id):
 
 
 def player_performance_plots(database,table,player_name):
-    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database,
+    conn = MySQLdb.connect(user="root",passwd="xxxx",db=database,
                            cursorclass=MySQLdb.cursors.DictCursor)
     cmd_target = 'SELECT * FROM '+ table + ' WHERE player IN (\''+ player_name +'\');'
     player_frame = pd.read_sql(cmd_target, con=conn)
@@ -229,7 +229,7 @@ def target_good_play_from(streak_counts,current_streak_pos,target_pos):
     return soln
 
 def player_frame_from_sql(database,table,player_name):
-    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database,
+    conn = MySQLdb.connect(user="root",passwd="xxxx",db=database,
                            cursorclass=MySQLdb.cursors.DictCursor)
     cmd_target = 'SELECT * FROM '+ table + ' WHERE player IN (\''+ player_name +'\');'
     player_frame = pd.read_sql(cmd_target, con=conn)
@@ -277,7 +277,7 @@ def create_player_dict_from1(player_name,this_game):
 
 def create_streak_frame_sql_from1(database,table):
     df_gameIDs = gameIDs_sql(database,table)
-    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database,
+    conn = MySQLdb.connect(user="root",passwd="xxxx",db=database,
                            cursorclass=MySQLdb.cursors.DictCursor)
     games_streak_list = []
     for game_id in df_gameIDs.values[:-1]:
@@ -427,7 +427,7 @@ def streak_counts_player_dates(player_frame, train_or_test):
 
 
 def unique_players_sql(database,table):
-    conn = MySQLdb.connect(user="root",passwd="ZayDvlA204",db=database,
+    conn = MySQLdb.connect(user="root",passwd="xxxx",db=database,
                            cursorclass=MySQLdb.cursors.DictCursor)
     cmd_target = 'SELECT DISTINCT player FROM streak_frame_with_perf;'
     df_players = pd.read_sql(cmd_target, con=conn)
